@@ -1,5 +1,6 @@
 package com.playtomic.tests.wallet.service;
 
+import com.playtomic.tests.wallet.exception.StripeServiceException;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
