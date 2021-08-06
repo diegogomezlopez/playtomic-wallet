@@ -13,6 +13,9 @@ spring:
     driverClassName: org.h2.Driver
     username: admin
     password: 1234
+  h2:
+    console:
+      enabled: true
 ---
 spring:
   profiles: test
@@ -25,3 +28,6 @@ spring:
     driverClassName: org.h2.Driver
     username: admin
     password: 1234
+  h2:
+    console:
+      enabled: true
