@@ -1,14 +1,22 @@
 package com.playtomic.tests.wallet.domain;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.*;
 
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import java.io.Serializable;
 import java.math.BigDecimal;
 
-@Getter
+@Data
+@Builder
 @AllArgsConstructor
-public final class Wallet {
+@NoArgsConstructor
+@Entity
+@Table(name = "wallets")
+public final class Wallet implements Serializable {
 
-    private final String id;
-    private final BigDecimal balance;
+    @Id
+    private Long id;
+    private BigDecimal balance;
 }
