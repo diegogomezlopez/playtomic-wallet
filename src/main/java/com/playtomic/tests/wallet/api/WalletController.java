@@ -23,11 +23,6 @@ public class WalletController {
         this.balanceService = balanceService;
     }
 
-    @RequestMapping({"", "/"})
-    void log() {
-        log.info("Logging from /");
-    }
-
     @GetMapping("/{id}")
     public WalletDTO getWallet(final @PathVariable Long id) {
         return walletService.getWallet(id);
