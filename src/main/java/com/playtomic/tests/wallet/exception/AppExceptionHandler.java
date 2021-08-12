@@ -33,6 +33,20 @@ public class AppExceptionHandler {
         return new ResponseEntity<>(errorMessage, new HttpHeaders(), HttpStatus.NOT_FOUND);
     }
 
+    @ExceptionHandler(value = { WalletRechargeException.class } )
+    public ResponseEntity<ErrorMessage> handleBalanceServiceException(WalletRechargeException exception) {
+        String errorMessageDescription = getLocalizedMessage(exception);
+        ErrorMessage errorMessage = new ErrorMessage(LocalDateTime.now(), errorMessageDescription);
+        return new ResponseEntity<>(errorMessage, new HttpHeaders(), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(value = { WalletChargeException.class } )
+    public ResponseEntity<ErrorMessage> handleWalletChargeException(WalletChargeException exception) {
+        String errorMessageDescription = getLocalizedMessage(exception);
+        ErrorMessage errorMessage = new ErrorMessage(LocalDateTime.now(), errorMessageDescription);
+        return new ResponseEntity<>(errorMessage, new HttpHeaders(), HttpStatus.NOT_ACCEPTABLE);
+    }
+
     private String getLocalizedMessage(final Exception exception) {
         return Optional.ofNullable(exception.getLocalizedMessage())
                 .orElse(exception.toString());
