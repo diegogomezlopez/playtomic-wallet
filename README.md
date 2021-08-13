@@ -7,6 +7,7 @@ Playtomic technical exercise
 * [Lombok](https://projectlombok.org/) - Project Lombok is a java library that automatically plugs into your editor and build tools, spicing up your java.
 * [Maven](https://maven.apache.org/) - Apache tool for project management.
 * [H2 Database](https://www.h2database.com/html/main.html) - Java SQL database
+* [Swagger](https://swagger.io/) - implify API development for users, teams, and enterprises with the Swagger open source and professional toolset.
 
 
 ### Testing
