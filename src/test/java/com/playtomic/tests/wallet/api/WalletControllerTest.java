@@ -157,7 +157,7 @@ public class WalletControllerTest {
                 .getResponse();
 
         assertThat(response.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
-        assertThat(response.getContentAsString()).contains("Recharge failed. Minimum amount rechargeable is 10.");
+        assertThat(response.getContentAsString()).contains(WALLET_RECHARGE_EXCEPTION);
     }
 
     @Test
