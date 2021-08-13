@@ -18,6 +18,7 @@ import java.sql.Statement;
 import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -60,6 +61,7 @@ public class H2WalletRepositoryTest {
 
         Optional<Wallet> wallet = walletRepository.findById(ID);
 
+        assertTrue(wallet.isPresent());
         assertThat(wallet.get().getId()).isEqualTo(ID);
         assertThat(wallet.get().getBalance()).isEqualTo(BALANCE);
     }
@@ -77,9 +79,7 @@ public class H2WalletRepositoryTest {
     public void findById_whenSQLException_thenThrowWalletRepositoryException() throws SQLException {
         when(statement.executeQuery(FIND_BY_ID_QUERY)).thenThrow(new SQLException());
 
-        Assertions.assertThrows(WalletRepositoryException.class, () -> {
-            walletRepository.findById(ID);
-        });
+        Assertions.assertThrows(WalletRepositoryException.class, () -> walletRepository.findById(ID));
     }
 
     @Test
@@ -95,9 +95,7 @@ public class H2WalletRepositoryTest {
     public void save_whenSQLException_thenThrowWalletRepositoryException() throws SQLException {
         when(statement.executeUpdate(CREATE_QUERY)).thenThrow(new SQLException());
 
-        Assertions.assertThrows(WalletRepositoryException.class, () -> {
-            walletRepository.save(wallet);
-        });
+        Assertions.assertThrows(WalletRepositoryException.class, () -> walletRepository.save(wallet));
     }
 
 }
