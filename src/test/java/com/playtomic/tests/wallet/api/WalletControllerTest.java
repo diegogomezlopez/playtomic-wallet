@@ -1,36 +1,33 @@
 package com.playtomic.tests.wallet.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.playtomic.tests.wallet.domain.Wallet;
 import com.playtomic.tests.wallet.dto.ChargeRequest;
 import com.playtomic.tests.wallet.dto.RechargeRequest;
 import com.playtomic.tests.wallet.dto.WalletDTO;
-import com.playtomic.tests.wallet.exception.AppExceptionHandler;
-import com.playtomic.tests.wallet.exception.WalletChargeException;
 import com.playtomic.tests.wallet.exception.WalletNotFoundException;
-import com.playtomic.tests.wallet.exception.WalletRechargeException;
-import com.playtomic.tests.wallet.service.BalanceService;
-import com.playtomic.tests.wallet.service.WalletService;
+import com.playtomic.tests.wallet.repository.H2WalletRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.json.JacksonTester;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.math.BigDecimal;
+import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.when;
+import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 
-@ExtendWith(MockitoExtension.class)
+@SpringBootTest
+@AutoConfigureMockMvc
 public class WalletControllerTest {
 
     private static final String WALLET_NOT_FOUND_EXCEPTION = "Wallet not found";
@@ -40,22 +37,23 @@ public class WalletControllerTest {
     private static final Long id = 1L;
     private static final BigDecimal balance = new BigDecimal(1000);
 
-    @InjectMocks
-    private WalletController walletController;
-
-    @Mock
-    private WalletService walletService;
-
-    @Mock
-    private BalanceService balanceService;
-
+    @Autowired
     private MockMvc mvc;
+
+    @MockBean
+    private H2WalletRepository walletRepository;
 
     private WalletDTO walletDTO;
 
+    private Wallet wallet;
+
     private RechargeRequest rechargeRequest;
 
+    private RechargeRequest invalidRechargeRequest;
+
     private ChargeRequest chargeRequest;
+
+    private ChargeRequest bigChargeRequest;
 
     private JacksonTester<WalletDTO> jsonWalletDTO;
 
@@ -66,10 +64,11 @@ public class WalletControllerTest {
     @BeforeEach
     public void setup() {
         JacksonTester.initFields(this, new ObjectMapper());
-        mvc = MockMvcBuilders.standaloneSetup(walletController)
-                .setControllerAdvice(new AppExceptionHandler())
-                .build();
         walletDTO = WalletDTO.builder()
+                .id(id)
+                .balance(balance)
+                .build();
+        wallet = Wallet.builder()
                 .id(id)
                 .balance(balance)
                 .build();
@@ -78,15 +77,36 @@ public class WalletControllerTest {
                 .amount(new BigDecimal(40))
                 .creditCardNumber("1234")
                 .build();
+        invalidRechargeRequest = RechargeRequest.builder()
+                .walletId(id)
+                .amount(new BigDecimal(5))
+                .creditCardNumber("1234")
+                .build();
         chargeRequest = ChargeRequest.builder()
                 .walletId(id)
                 .amount(new BigDecimal(10))
                 .build();
+        bigChargeRequest = ChargeRequest.builder()
+                .walletId(id)
+                .amount(new BigDecimal(2000))
+                .build();
+    }
+
+    @Test
+    public void getWallet_whenWalletNotExists_thenReturnException() throws Exception {
+        given(walletRepository.findById(id)).willThrow(new WalletNotFoundException());
+
+        MockHttpServletResponse response = mvc.perform(get("/wallet/1").accept(MediaType.APPLICATION_JSON))
+                .andReturn()
+                .getResponse();
+
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.NOT_FOUND.value());
+        assertThat(response.getContentAsString()).contains(WALLET_NOT_FOUND_EXCEPTION);
     }
 
     @Test
     public void getWallet_whenWalletExists_thenReturnWallet() throws Exception {
-        when(walletService.getWallet(id)).thenReturn(walletDTO);
+        given(walletRepository.findById(id)).willReturn(Optional.of(wallet));
 
         MockHttpServletResponse response = mvc.perform(get("/wallet/1").accept(MediaType.APPLICATION_JSON))
                 .andReturn()
@@ -102,19 +122,8 @@ public class WalletControllerTest {
     }
 
     @Test
-    public void getWallet_whenWalletNotExists_thenReturnException() throws Exception {
-        when(walletService.getWallet(id)).thenThrow(new WalletNotFoundException());
-
-        MockHttpServletResponse response = mvc.perform(get("/wallet/1").accept(MediaType.APPLICATION_JSON))
-                .andReturn()
-                .getResponse();
-
-        assertThat(response.getStatus()).isEqualTo(HttpStatus.NOT_FOUND.value());
-        assertThat(response.getContentAsString()).contains(WALLET_NOT_FOUND_EXCEPTION);
-    }
-
-    @Test
     public void createWallet_whenNewWallet_thenCreateWallet() throws Exception {
+
         MockHttpServletResponse response = mvc.perform(post("/wallet").contentType(MediaType.APPLICATION_JSON).content(jsonWalletDTO.write(walletDTO).getJson()))
                 .andReturn()
                 .getResponse();
@@ -125,6 +134,8 @@ public class WalletControllerTest {
 
     @Test
     public void recharge_whenValidRequest_thenRechargeWallet() throws Exception {
+        given(walletRepository.findById(id)).willReturn(Optional.of(wallet));
+
         MockHttpServletResponse response = mvc.perform(patch("/wallet/recharge")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(jsonRechargeRequest.write(rechargeRequest).getJson()))
@@ -137,11 +148,11 @@ public class WalletControllerTest {
 
     @Test
     public void recharge_whenMinimumAMountNotReached_thenRechargeException() throws Exception {
-        doThrow(new WalletRechargeException(WALLET_RECHARGE_EXCEPTION)).when(balanceService).recharge(rechargeRequest.getWalletId(), rechargeRequest.getCreditCardNumber(), rechargeRequest.getAmount());
+        given(walletRepository.findById(id)).willReturn(Optional.of(wallet));
 
         MockHttpServletResponse response = mvc.perform(patch("/wallet/recharge")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(jsonRechargeRequest.write(rechargeRequest).getJson()))
+                .content(jsonRechargeRequest.write(invalidRechargeRequest).getJson()))
                 .andReturn()
                 .getResponse();
 
@@ -151,7 +162,6 @@ public class WalletControllerTest {
 
     @Test
     public void recharge_whenWalletNotExists_thenWalletNofFoundException() throws Exception {
-        doThrow(new WalletNotFoundException()).when(balanceService).recharge(rechargeRequest.getWalletId(), rechargeRequest.getCreditCardNumber(), rechargeRequest.getAmount());
 
         MockHttpServletResponse response = mvc.perform(patch("/wallet/recharge")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -165,6 +175,7 @@ public class WalletControllerTest {
 
     @Test
     public void charge_whenWalletHasEnoughBalance_thenChargeAmountToWallet() throws Exception {
+        given(walletRepository.findById(id)).willReturn(Optional.of(wallet));
 
         MockHttpServletResponse response = mvc.perform(patch("/wallet/charge")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -178,11 +189,11 @@ public class WalletControllerTest {
 
     @Test
     public void charge_whenWalletHasNotEnoughBalance_thenWalletChargeException() throws Exception {
-        doThrow(new WalletChargeException(WALLET_CHARGE_EXCEPTION)).when(balanceService).charge(chargeRequest.getWalletId(), chargeRequest.getAmount());
+        given(walletRepository.findById(id)).willReturn(Optional.of(wallet));
 
         MockHttpServletResponse response = mvc.perform(patch("/wallet/charge")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(jsonChargeRequest.write(chargeRequest).getJson()))
+                .content(jsonChargeRequest.write(bigChargeRequest).getJson()))
                 .andReturn()
                 .getResponse();
 
