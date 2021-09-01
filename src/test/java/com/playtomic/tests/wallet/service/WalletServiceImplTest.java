@@ -5,7 +5,7 @@ import com.playtomic.tests.wallet.domain.Wallet;
 import com.playtomic.tests.wallet.dto.WalletDTO;
 import com.playtomic.tests.wallet.exception.WalletNotFoundException;
 import com.playtomic.tests.wallet.exception.WalletServiceException;
-import com.playtomic.tests.wallet.repository.H2WalletRepository;
+import com.playtomic.tests.wallet.repository.JPAWalletRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -30,7 +30,7 @@ public class WalletServiceImplTest {
     private WalletServiceImpl walletService;
 
     @Mock
-    private H2WalletRepository walletRepository;
+    private JPAWalletRepository walletRepository;
 
     @Mock
     private WalletConverter walletConverter;
@@ -63,16 +63,12 @@ public class WalletServiceImplTest {
 
     @Test
     public void findWalletById_whenWalletIdNull_thenThrowWalletServiceException() {
-        Assertions.assertThrows(WalletServiceException.class, () -> {
-            walletService.findWalletById(null);
-        });
+        Assertions.assertThrows(WalletServiceException.class, () -> walletService.findWalletById(null));
     }
 
     @Test
     public void findWalletById_whenWalletNotExists_thenThrowWalletNotFoundException() {
-        Assertions.assertThrows(WalletNotFoundException.class, () -> {
-            walletService.findWalletById(ID);
-        });
+        Assertions.assertThrows(WalletNotFoundException.class, () -> walletService.findWalletById(ID));
     }
 
     @Test
