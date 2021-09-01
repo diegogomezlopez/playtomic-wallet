@@ -9,4 +9,6 @@ public interface WalletRepository extends Repository<Wallet, Long> {
     Optional<Wallet> findById(final Long id);
 
     void save(final Wallet wallet);
+
+    void deleteAll();
 }
