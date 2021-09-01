@@ -1,5 +1,6 @@
 package com.playtomic.tests.wallet.exception;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -35,6 +36,11 @@ public class AppExceptionHandler {
     @ExceptionHandler(value = { WalletChargeException.class } )
     public ResponseEntity<ErrorMessage> handleWalletChargeException(WalletChargeException exception) {
         return getResponse(exception, HttpStatus.NOT_ACCEPTABLE);
+    }
+
+    @ExceptionHandler(value = { DataIntegrityViolationException.class } )
+    public ResponseEntity<ErrorMessage> handleDataIntegrityViolationException(DataIntegrityViolationException exception) {
+        return getResponse(exception, HttpStatus.CONFLICT);
     }
 
     private ResponseEntity<ErrorMessage> getResponse(final Exception exception, final HttpStatus status) {
