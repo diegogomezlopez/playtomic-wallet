@@ -49,10 +49,11 @@ public class BalanceServiceImplTest {
     }
 
     @Test
-    public void recharge_whenConditionsOk_thenRechargeWallet() {
+    public void recharge_whenConditionsOk_thenRechargeWallet() throws StripeServiceException {
         balanceService.recharge(ID, CREDIT_CARD_NUMBER, AMOUNT);
 
         verify(walletRepository, times(1)).save(wallet);
+        verify(stripeService, times(1)).charge(CREDIT_CARD_NUMBER, AMOUNT);
         assertThat(wallet.getBalance()).isEqualTo(new BigDecimal(1100));
     }
 

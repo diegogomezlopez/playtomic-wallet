@@ -1,11 +1,12 @@
 package com.playtomic.tests.wallet.service;
 
 import com.playtomic.tests.wallet.domain.Wallet;
+import com.playtomic.tests.wallet.exception.StripeServiceException;
 import com.playtomic.tests.wallet.exception.WalletChargeException;
 import com.playtomic.tests.wallet.exception.WalletRechargeException;
-import com.playtomic.tests.wallet.exception.StripeServiceException;
 import com.playtomic.tests.wallet.repository.WalletRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 
@@ -22,8 +23,8 @@ public class BalanceServiceImpl implements BalanceService {
         this.walletService = walletService;
     }
 
-
     @Override
+    @Transactional
     public void recharge(final Long walletId, final String creditCardNumber, final BigDecimal amount) {
         Wallet wallet = walletService.findWalletById(walletId);
         chargeToCreditCard(creditCardNumber, amount);
@@ -32,6 +33,7 @@ public class BalanceServiceImpl implements BalanceService {
     }
 
     @Override
+    @Transactional
     public void charge(Long walletId, BigDecimal amount) {
         Wallet wallet = walletService.findWalletById(walletId);
         if (wallet.getBalance().compareTo(amount) < 0) {
