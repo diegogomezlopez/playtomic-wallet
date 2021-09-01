@@ -4,7 +4,6 @@ import com.playtomic.tests.wallet.domain.Wallet;
 import com.playtomic.tests.wallet.exception.StripeServiceException;
 import com.playtomic.tests.wallet.exception.WalletChargeException;
 import com.playtomic.tests.wallet.exception.WalletRechargeException;
-import com.playtomic.tests.wallet.repository.WalletRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -34,9 +33,6 @@ public class BalanceServiceImplTest {
     @Mock
     private StripeService stripeService;
 
-    @Mock
-    private WalletRepository walletRepository;
-
     private Wallet wallet;
 
     @BeforeEach
@@ -52,7 +48,6 @@ public class BalanceServiceImplTest {
     public void recharge_whenConditionsOk_thenRechargeWallet() throws StripeServiceException {
         balanceService.recharge(ID, CREDIT_CARD_NUMBER, AMOUNT);
 
-        verify(walletRepository, times(1)).save(wallet);
         verify(stripeService, times(1)).charge(CREDIT_CARD_NUMBER, AMOUNT);
         assertThat(wallet.getBalance()).isEqualTo(new BigDecimal(1100));
     }
@@ -61,16 +56,13 @@ public class BalanceServiceImplTest {
     public void recharge_whenNotMinimumRechargeLimit_thenThrowWalletRechargeException() throws StripeServiceException {
         doThrow(new StripeServiceException()).when(stripeService).charge(CREDIT_CARD_NUMBER, AMOUNT);
 
-        Assertions.assertThrows(WalletRechargeException.class, () -> {
-            balanceService.recharge(ID, CREDIT_CARD_NUMBER, AMOUNT);
-        });
+        Assertions.assertThrows(WalletRechargeException.class, () -> balanceService.recharge(ID, CREDIT_CARD_NUMBER, AMOUNT));
     }
 
     @Test
     public void charge_whenConditionOK_thenChargeInWallet() {
         balanceService.charge(ID, AMOUNT);
 
-        verify(walletRepository, times(1)).save(wallet);
         assertThat(wallet.getBalance()).isEqualTo(new BigDecimal(900));
     }
 
@@ -78,8 +70,6 @@ public class BalanceServiceImplTest {
     public void charge_whenNotEnoughBalance_thenThrowWalletChargeException() {
         wallet.setBalance(new BigDecimal(0));
 
-        Assertions.assertThrows(WalletChargeException.class, () -> {
-            balanceService.charge(ID, AMOUNT);
-        });
+        Assertions.assertThrows(WalletChargeException.class, () -> balanceService.charge(ID, AMOUNT));
     }
 }

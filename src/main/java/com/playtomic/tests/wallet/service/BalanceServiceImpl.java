@@ -4,7 +4,6 @@ import com.playtomic.tests.wallet.domain.Wallet;
 import com.playtomic.tests.wallet.exception.StripeServiceException;
 import com.playtomic.tests.wallet.exception.WalletChargeException;
 import com.playtomic.tests.wallet.exception.WalletRechargeException;
-import com.playtomic.tests.wallet.repository.WalletRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -13,12 +12,10 @@ import java.math.BigDecimal;
 @Service
 public class BalanceServiceImpl implements BalanceService {
 
-    private final WalletRepository walletRepository;
     private final StripeService stripeService;
     private final WalletService walletService;
 
-    public BalanceServiceImpl(final WalletRepository walletRepository, final StripeService stripeService, final WalletService walletService) {
-        this.walletRepository = walletRepository;
+    public BalanceServiceImpl(final StripeService stripeService, final WalletService walletService) {
         this.stripeService = stripeService;
         this.walletService = walletService;
     }
@@ -29,7 +26,6 @@ public class BalanceServiceImpl implements BalanceService {
         Wallet wallet = walletService.findWalletById(walletId);
         chargeToCreditCard(creditCardNumber, amount);
         wallet.setBalance(wallet.getBalance().add(amount));
-        walletRepository.save(wallet);
     }
 
     @Override
@@ -40,7 +36,6 @@ public class BalanceServiceImpl implements BalanceService {
             throw new WalletChargeException("Not enough credit in your wallet.");
         }
         wallet.setBalance(wallet.getBalance().subtract(amount));
-        walletRepository.save(wallet);
     }
 
     private void chargeToCreditCard(final String creditCardNumber, final BigDecimal amount) {
