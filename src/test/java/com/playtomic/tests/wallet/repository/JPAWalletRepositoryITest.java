@@ -1,6 +1,5 @@
 package com.playtomic.tests.wallet.repository;
 
-import com.playtomic.tests.wallet.config.H2ConfigProperties;
 import com.playtomic.tests.wallet.domain.Wallet;
 import com.playtomic.tests.wallet.exception.WalletNotFoundException;
 import com.playtomic.tests.wallet.exception.WalletRepositoryException;
@@ -44,9 +43,6 @@ public class JPAWalletRepositoryITest {
     @Autowired
     private BalanceService balanceService;
 
-    @Autowired
-    private H2ConfigProperties properties;
-
     private Wallet wallet;
 
     @BeforeEach
@@ -69,8 +65,8 @@ public class JPAWalletRepositoryITest {
         Optional<Wallet> result = walletRepository.findById(ID);
 
         assertTrue(result.isPresent());
-        assertThat(result.get().getId()).isEqualTo(wallet.getId());
-        assertThat(result.get().getBalance()).isEqualTo(wallet.getBalance());
+        assertThat(wallet.getId()).isEqualTo(result.get().getId());
+        assertThat(wallet.getBalance()).isEqualTo(result.get().getBalance());
     }
 
     @Test
@@ -78,7 +74,7 @@ public class JPAWalletRepositoryITest {
         Optional<Wallet> result = walletRepository.findById(ID);
 
         assertFalse(result.isPresent());
-        assertThat(result).isEqualTo(Optional.empty());
+        assertThat(Optional.empty()).isEqualTo(result);
     }
 
     @Test
@@ -90,7 +86,7 @@ public class JPAWalletRepositoryITest {
     public void save_whenOk_thenCreateWallet() {
         walletRepository.save(wallet);
 
-        assertThat(walletRepository.findById(ID)).isEqualTo(Optional.of(wallet));
+        assertThat(Optional.of(wallet)).isEqualTo(walletRepository.findById(ID));
     }
 
     @Test
@@ -116,14 +112,12 @@ public class JPAWalletRepositoryITest {
 
         final ExecutorService executor = Executors.newFixedThreadPool(amounts.size());
 
-        for (final BigDecimal amount : amounts) {
-            executor.execute(() -> balanceService.charge(ID, amount));
-        }
+        amounts.forEach(amount -> executor.execute(() -> balanceService.charge(ID, amount)));
 
         executor.shutdown();
         if (executor.awaitTermination(1, TimeUnit.MINUTES)){
             Wallet result = walletRepository.findById(ID).orElseThrow(WalletNotFoundException::new);
-            assertThat(result.getBalance()).isEqualTo(wallet.getBalance().subtract(AMOUNT1).subtract(AMOUNT2).subtract(AMOUNT3));
+            assertThat(wallet.getBalance().subtract(AMOUNT1).subtract(AMOUNT2).subtract(AMOUNT3)).isEqualTo(result.getBalance());
         }
     }
 
@@ -138,14 +132,12 @@ public class JPAWalletRepositoryITest {
 
         final ExecutorService executor = Executors.newFixedThreadPool(amounts.size());
 
-        for (final BigDecimal amount : amounts) {
-            executor.execute(() -> balanceService.recharge(ID, CREDIT_CARD_NUMBER, amount));
-        }
+        amounts.forEach(amount -> executor.execute(() -> balanceService.recharge(ID, CREDIT_CARD_NUMBER, amount)));
 
         executor.shutdown();
         if (executor.awaitTermination(1, TimeUnit.MINUTES)){
             Wallet result = walletRepository.findById(ID).orElseThrow(WalletNotFoundException::new);
-            assertThat(result.getBalance()).isEqualTo(wallet.getBalance().add(AMOUNT1).add(AMOUNT2).add(AMOUNT3));
+            assertThat(wallet.getBalance().add(AMOUNT1).add(AMOUNT2).add(AMOUNT3)).isEqualTo(result.getBalance());
         }
     }
 }
