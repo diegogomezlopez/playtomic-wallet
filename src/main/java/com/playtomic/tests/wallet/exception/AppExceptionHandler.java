@@ -39,8 +39,9 @@ public class AppExceptionHandler {
     }
 
     @ExceptionHandler(value = { DataIntegrityViolationException.class } )
-    public ResponseEntity<ErrorMessage> handleDataIntegrityViolationException(DataIntegrityViolationException exception) {
-        return getResponse(exception, HttpStatus.CONFLICT);
+    public ResponseEntity<ErrorMessage> handleDataIntegrityViolationException() {
+        WalletDuplicateKeyException duplicatedKeyException = new WalletDuplicateKeyException();
+        return getResponse(duplicatedKeyException, HttpStatus.CONFLICT);
     }
 
     private ResponseEntity<ErrorMessage> getResponse(final Exception exception, final HttpStatus status) {
