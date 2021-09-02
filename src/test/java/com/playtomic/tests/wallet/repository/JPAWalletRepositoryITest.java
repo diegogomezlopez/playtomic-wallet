@@ -14,9 +14,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.math.BigDecimal;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -36,6 +34,7 @@ public class JPAWalletRepositoryITest {
     private static final BigDecimal AMOUNT1 = new BigDecimal(10);
     private static final BigDecimal AMOUNT2 = new BigDecimal(20);
     private static final BigDecimal AMOUNT3 = new BigDecimal(30);
+    private static final BigDecimal AMOUNT4 = new BigDecimal(500);
 
     @Autowired
     private JPAWalletRepository walletRepository;
@@ -118,6 +117,26 @@ public class JPAWalletRepositoryITest {
         if (executor.awaitTermination(1, TimeUnit.MINUTES)){
             Wallet result = walletRepository.findById(ID).orElseThrow(WalletNotFoundException::new);
             assertThat(wallet.getBalance().subtract(AMOUNT1).subtract(AMOUNT2).subtract(AMOUNT3)).isEqualTo(result.getBalance());
+        }
+    }
+
+    @Test
+    public void concurrency_whenChargesAboveBalance_thenResultNeverNegative() throws InterruptedException {
+        walletRepository.save(wallet);
+
+        List<BigDecimal> amounts = new ArrayList<>();
+        amounts.add(AMOUNT4);
+        amounts.add(AMOUNT4);
+        amounts.add(AMOUNT4);
+
+        final ExecutorService executor = Executors.newFixedThreadPool(amounts.size());
+
+        amounts.forEach(amount -> executor.execute(() -> balanceService.charge(ID, amount)));
+
+        executor.shutdown();
+        if (executor.awaitTermination(1, TimeUnit.MINUTES)){
+            Wallet result = walletRepository.findById(ID).orElseThrow(WalletNotFoundException::new);
+            assertThat(BigDecimal.ZERO).isEqualTo(result.getBalance());
         }
     }
 
