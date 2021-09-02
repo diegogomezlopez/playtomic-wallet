@@ -3,9 +3,11 @@ package com.playtomic.tests.wallet.repository;
 import com.playtomic.tests.wallet.domain.Wallet;
 import com.playtomic.tests.wallet.exception.WalletRepositoryException;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.*;
+import javax.persistence.EntityManager;
+import javax.persistence.LockModeType;
+import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
 import java.util.Optional;
 
 @Repository
@@ -19,7 +21,6 @@ public class JPAWalletRepository implements WalletRepository {
     }
 
     @Override
-    @Transactional
     public Optional<Wallet> findById(Long id) {
         try {
             Wallet wallet = entityManager.find(Wallet.class, id, LockModeType.PESSIMISTIC_WRITE);
@@ -30,7 +31,6 @@ public class JPAWalletRepository implements WalletRepository {
     }
 
     @Override
-    @Transactional
     public void save(final Wallet wallet) {
         try {
             entityManager.persist(wallet);
@@ -40,7 +40,6 @@ public class JPAWalletRepository implements WalletRepository {
     }
 
     @Override
-    @Transactional
     public void deleteAll() {
         try {
             Query deleteAllQuery = entityManager.createNativeQuery("TRUNCATE TABLE WALLET");
