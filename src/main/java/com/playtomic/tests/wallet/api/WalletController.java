@@ -1,19 +1,16 @@
 package com.playtomic.tests.wallet.api;
 
-import com.playtomic.tests.wallet.dto.RechargeRequest;
 import com.playtomic.tests.wallet.dto.ChargeRequest;
+import com.playtomic.tests.wallet.dto.RechargeRequest;
 import com.playtomic.tests.wallet.dto.WalletDTO;
 import com.playtomic.tests.wallet.service.BalanceService;
 import com.playtomic.tests.wallet.service.WalletService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/wallet")
 public class WalletController {
-    private Logger log = LoggerFactory.getLogger(WalletController.class);
 
     private final WalletService walletService;
     private final BalanceService balanceService;
