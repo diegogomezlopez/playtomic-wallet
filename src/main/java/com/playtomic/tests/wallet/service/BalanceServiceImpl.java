@@ -5,6 +5,7 @@ import com.playtomic.tests.wallet.exception.StripeServiceException;
 import com.playtomic.tests.wallet.exception.WalletChargeException;
 import com.playtomic.tests.wallet.exception.WalletRechargeException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
@@ -21,7 +22,7 @@ public class BalanceServiceImpl implements BalanceService {
     }
 
     @Override
-    @Transactional
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     public void recharge(final Long walletId, final String creditCardNumber, final BigDecimal amount) {
         Wallet wallet = walletService.findWalletById(walletId);
         chargeToCreditCard(creditCardNumber, amount);
@@ -29,7 +30,7 @@ public class BalanceServiceImpl implements BalanceService {
     }
 
     @Override
-    @Transactional
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     public void charge(Long walletId, BigDecimal amount) {
         Wallet wallet = walletService.findWalletById(walletId);
         if (wallet.getBalance().compareTo(amount) < 0) {
