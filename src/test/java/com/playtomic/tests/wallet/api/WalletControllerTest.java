@@ -6,7 +6,7 @@ import com.playtomic.tests.wallet.dto.ChargeRequest;
 import com.playtomic.tests.wallet.dto.RechargeRequest;
 import com.playtomic.tests.wallet.dto.WalletDTO;
 import com.playtomic.tests.wallet.exception.WalletNotFoundException;
-import com.playtomic.tests.wallet.repository.JPAWalletRepository;
+import com.playtomic.tests.wallet.repository.WalletRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,7 +41,7 @@ public class WalletControllerTest {
     private MockMvc mvc;
 
     @MockBean
-    private JPAWalletRepository walletRepository;
+    private WalletRepository walletRepository;
 
     private WalletDTO walletDTO;
 

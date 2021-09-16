@@ -1,16 +1,19 @@
 package com.playtomic.tests.wallet.repository;
 
 import com.playtomic.tests.wallet.domain.Wallet;
-import org.springframework.data.repository.Repository;
+import org.springframework.data.jpa.repository.Lock;
+import org.springframework.data.repository.CrudRepository;
+import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.LockModeType;
 import java.util.Optional;
 
+@Repository
 @Transactional
-public interface WalletRepository extends Repository<Wallet, Long> {
-    Optional<Wallet> findById(final Long id);
+public interface WalletRepository extends CrudRepository<Wallet, Long> {
 
-    void save(final Wallet wallet);
-
-    void deleteAll();
+    @Override
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    Optional<Wallet> findById(Long id);
 }

@@ -5,7 +5,7 @@ import com.playtomic.tests.wallet.domain.Wallet;
 import com.playtomic.tests.wallet.dto.WalletDTO;
 import com.playtomic.tests.wallet.exception.WalletNotFoundException;
 import com.playtomic.tests.wallet.exception.WalletServiceException;
-import com.playtomic.tests.wallet.repository.JPAWalletRepository;
+import com.playtomic.tests.wallet.repository.WalletRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -30,7 +30,7 @@ public class WalletServiceImplTest {
     private WalletServiceImpl walletService;
 
     @Mock
-    private JPAWalletRepository walletRepository;
+    private WalletRepository walletRepository;
 
     @Mock
     private WalletConverter walletConverter;

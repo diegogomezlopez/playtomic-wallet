@@ -2,7 +2,7 @@ package com.playtomic.tests.wallet.service;
 
 import com.playtomic.tests.wallet.domain.Wallet;
 import com.playtomic.tests.wallet.exception.WalletNotFoundException;
-import com.playtomic.tests.wallet.repository.JPAWalletRepository;
+import com.playtomic.tests.wallet.repository.WalletRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -37,7 +37,7 @@ public class BalanceServiceITest {
     private BalanceService balanceService;
 
     @Autowired
-    private JPAWalletRepository walletRepository;
+    private WalletRepository walletRepository;
 
     private Wallet wallet;
 

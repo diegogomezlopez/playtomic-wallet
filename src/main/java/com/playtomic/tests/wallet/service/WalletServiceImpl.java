@@ -5,7 +5,6 @@ import com.playtomic.tests.wallet.domain.Wallet;
 import com.playtomic.tests.wallet.dto.WalletDTO;
 import com.playtomic.tests.wallet.exception.WalletNotFoundException;
 import com.playtomic.tests.wallet.exception.WalletServiceException;
-import com.playtomic.tests.wallet.repository.JPAWalletRepository;
 import com.playtomic.tests.wallet.repository.WalletRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,7 +15,7 @@ public class WalletServiceImpl implements WalletService {
     private final WalletRepository walletRepository;
     private final WalletConverter walletConverter;
 
-    public WalletServiceImpl(final JPAWalletRepository repository, final WalletConverter walletConverter) {
+    public WalletServiceImpl(final WalletRepository repository, final WalletConverter walletConverter) {
         this.walletRepository = repository;
         this.walletConverter = walletConverter;
     }
