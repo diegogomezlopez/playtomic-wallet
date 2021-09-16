@@ -8,7 +8,6 @@ import com.playtomic.tests.wallet.exception.WalletServiceException;
 import com.playtomic.tests.wallet.repository.JPAWalletRepository;
 import com.playtomic.tests.wallet.repository.WalletRepository;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
@@ -37,7 +36,7 @@ public class WalletServiceImpl implements WalletService {
     }
 
     @Override
-    @Transactional(isolation = Isolation.SERIALIZABLE)
+    @Transactional
     public WalletDTO getWallet(final Long id) {
         Wallet wallet = findWalletById(id);
         return walletConverter.convertToDTO(wallet);
